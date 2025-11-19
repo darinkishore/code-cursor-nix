@@ -7,9 +7,9 @@
 ## Features
 
 - 🌐 **Browser Automation Ready**: Chrome bundled in FHS environment for seamless browser testing
-- 🚀 **Auto-updating**: Checks for new Cursor releases twice weekly via GitHub Actions
+- 🚀 **Auto-updating**: Checks for new Cursor releases 3x weekly via GitHub Actions
 - 📦 **Multi-platform**: Supports Linux (x86_64, aarch64) and macOS (x86_64, aarch64)
-- ⚡ **Fast**: New versions available within hours of official release
+- ⚡ **Fast**: New versions available within 48 hours of official release
 - 🔐 **Reliable**: Automatic hash verification and build testing
 - 🤖 **Automated PRs**: Creates and auto-merges PRs when tests pass
 - 🔧 **Zero Configuration**: Browser automation works out of the box on NixOS
@@ -162,13 +162,14 @@ sudo nixos-rebuild switch --flake .
 
 ## How It Works
 
-1. **Twice-weekly checks**: GitHub Actions runs every Tuesday and Friday to check for new Cursor versions
+1. **3x weekly checks**: GitHub Actions runs Monday, Wednesday, Friday at 9:00 UTC
 2. **Version detection**: Queries Cursor's official API: `https://api2.cursor.sh/updates/api/download/stable/{platform}/cursor`
 3. **Multi-platform support**: Downloads and verifies hashes for all supported platforms
 4. **Automated testing**: Builds the package on Linux x86_64 and runs flake checks
-5. **Pull requests**: Creates a PR with the update, which auto-merges if all tests pass
-6. **Fast delivery**: New versions typically available within hours of check
+5. **Pull requests**: Creates PR with updates, auto-merges if tests pass
+6. **Release tagging**: Automatically creates GitHub releases for version tracking
 7. **Browser integration**: Chrome is bundled in FHS environment for seamless browser automation
+8. **Branch cleanup**: Automatically deletes merged branches to keep repository clean
 
 ## Manual Updates
 
@@ -190,7 +191,7 @@ nix build .#cursor
 
 | Method | Update Speed | Browser Automation | Reliability | Platforms |
 |--------|-------------|-------------------|-------------|-----------|
-| **code-cursor-nix** | Twice weekly | ✅ **Full Chrome support** | Automated testing | Linux, macOS |
+| **code-cursor-nix** | 3x weekly | ✅ **Full Chrome support** | Automated testing | Linux, macOS |
 | nixpkgs (code-cursor) | Days to weeks | ❌ Manual setup needed | Manual review | Linux, macOS |
 | omarcresp/cursor-flake | Manual updates | ❌ Not included | Community-driven | Linux, macOS |
 | Direct AppImage | Immediate | ❌ Complex configuration | Manual | Linux only |
@@ -220,6 +221,81 @@ Cursor's AI capabilities can now fully leverage browser automation:
 - Debug web applications with AI assistance
 - Create end-to-end test suites with AI guidance
 - Perform web scraping tasks through natural language
+
+## Troubleshooting
+
+### Browser automation not working
+
+**Problem**: Playwright/Puppeteer tests fail with "browser not found" errors
+
+**Solution**: The Chrome binary should be automatically available in the FHS environment. Verify:
+
+```bash
+# Inside a shell with cursor available
+echo $CHROME_BIN
+echo $CHROME_PATH
+```
+
+Both should point to the Chrome binary. If not, the FHS environment may not be properly configured.
+
+### Cursor won't start on NixOS
+
+**Problem**: Application fails to launch or shows library errors
+
+**Solution**: This usually indicates the FHS environment is not working correctly:
+
+1. Try rebuilding: `nix build .#cursor --rebuild`
+2. Check if AppImage tools are available: `nix-shell -p appimage-run`
+3. Open an issue with your NixOS version and error message
+
+### Update script fails
+
+**Problem**: `./scripts/update-version.sh` fails with API errors
+
+**Solution**: Cursor's API may be temporarily unavailable or rate-limiting:
+
+1. Wait a few minutes and retry
+2. Check https://cursor.com/changelog for latest version
+3. The automatic workflow will retry on the next scheduled run
+
+### Hash mismatch during build
+
+**Problem**: Build fails with "hash mismatch" error
+
+**Solution**: Cursor may have updated the binary without changing the version:
+
+```bash
+# Manually update hashes
+./scripts/update-version.sh
+```
+
+Or wait for the next automatic update (runs 3x weekly).
+
+## Project Structure
+
+```
+code-cursor-nix/
+├── flake.nix              # Main flake configuration with overlay
+├── package.nix            # Package derivation with FHS + Chrome
+├── scripts/
+│   └── update-version.sh  # Auto-update script
+├── .github/
+│   └── workflows/
+│       ├── update.yml     # Auto-update workflow (3x weekly)
+│       ├── release.yml    # Automatic release tagging
+│       └── cleanup-branches.yml  # Branch cleanup automation
+└── README.md
+```
+
+## Maintainers
+
+- [@jacopone](https://github.com/jacopone)
+
+## Related Projects
+
+- [antigravity-nix](https://github.com/jacopone/antigravity-nix) - Auto-updating Google Antigravity agentic IDE
+- [claude-code-nix](https://github.com/sadjow/claude-code-nix) - Auto-updating Claude Code CLI
+- [nixpkgs](https://github.com/NixOS/nixpkgs) - Official Nix packages collection
 
 ## Inspired By
 
