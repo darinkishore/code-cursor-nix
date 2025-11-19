@@ -14,9 +14,11 @@
 - 🤖 **Automated PRs**: Creates and auto-merges PRs when tests pass
 - 🔧 **Zero Configuration**: Browser automation works out of the box on NixOS
 
-## 🎯 Browser Automation Support (New!)
+## 🎯 Browser Automation Support (Linux Only)
 
-This flake includes **full browser automation support** for Cursor on NixOS, solving a common pain point for developers who use browser testing tools like Playwright, Puppeteer, or Selenium.
+This flake includes **full browser automation support** for Cursor on NixOS Linux, solving a common pain point for developers who use browser testing tools like Playwright, Puppeteer, or Selenium.
+
+**Note:** Browser automation support is currently only available on Linux (x86_64-linux, aarch64-linux). macOS users will need to install Chrome separately.
 
 ### The Problem on NixOS
 
@@ -25,11 +27,11 @@ On standard NixOS installations, browser automation typically fails because:
 - Path resolution issues prevent Cursor from finding Chrome/Chromium
 - Complex manual configuration is usually required
 
-### Our Solution
+### Our Solution (Linux)
 
-We've bundled Google Chrome directly in the FHS (Filesystem Hierarchy Standard) environment, making browser automation **work out of the box** with zero configuration needed.
+On Linux systems, we've bundled Google Chrome directly in the FHS (Filesystem Hierarchy Standard) environment, making browser automation **work out of the box** with zero configuration needed.
 
-### What This Enables
+### What This Enables (Linux Only)
 
 - ✅ **Playwright** browser testing works immediately
 - ✅ **Puppeteer** automation runs without setup
@@ -39,10 +41,10 @@ We've bundled Google Chrome directly in the FHS (Filesystem Hierarchy Standard) 
 - ✅ **Screenshot testing** and visual regression testing
 - ✅ **End-to-end testing** frameworks run without issues
 
-### Technical Implementation
+### Technical Implementation (Linux)
 
 The Chrome integration is achieved through:
-1. **FHS Environment**: Chrome is included in the AppImage's FHS sandbox
+1. **FHS Environment**: Chrome is included in the AppImage's FHS sandbox (Linux only)
 2. **Environment Variables**: `CHROME_BIN` and `CHROME_PATH` are automatically set
 3. **Path Resolution**: Chrome is accessible at standard locations expected by automation tools
 4. **No System Pollution**: Chrome remains isolated within Cursor's environment
@@ -191,7 +193,7 @@ nix build .#cursor
 
 | Method | Update Speed | Browser Automation | Reliability | Platforms |
 |--------|-------------|-------------------|-------------|-----------|
-| **code-cursor-nix** | 3x weekly | ✅ **Full Chrome support** | Automated testing | Linux, macOS |
+| **code-cursor-nix** | 3x weekly | ✅ **Chrome on Linux** | Automated testing | Linux, macOS |
 | nixpkgs (code-cursor) | Days to weeks | ❌ Manual setup needed | Manual review | Linux, macOS |
 | omarcresp/cursor-flake | Manual updates | ❌ Not included | Community-driven | Linux, macOS |
 | Direct AppImage | Immediate | ❌ Complex configuration | Manual | Linux only |
@@ -206,17 +208,19 @@ NixOS users have historically faced significant challenges with browser automati
 - Often involves impure solutions that break reproducibility
 - AI coding assistants struggle to help with browser-based tasks
 
-### This Flake Solves It
+### This Flake Solves It (Linux)
 
-With this flake, NixOS users get the same seamless browser automation experience as users on other platforms:
-- **No manual Chrome/Chromium installation required**
+With this flake, NixOS Linux users get the same seamless browser automation experience as users on other platforms:
+- **No manual Chrome/Chromium installation required** (Linux only)
 - **No complex shell environments or nix-shell configurations**
 - **AI assistants in Cursor can now effectively help with browser testing**
 - **Maintains NixOS purity** - Chrome is isolated within the FHS environment
 
-### Perfect for AI-Assisted Development
+**macOS users:** You'll need to install Chrome separately for browser automation support.
 
-Cursor's AI capabilities can now fully leverage browser automation:
+### Perfect for AI-Assisted Development (Linux)
+
+On Linux, Cursor's AI capabilities can fully leverage browser automation:
 - Generate and run Playwright tests directly
 - Debug web applications with AI assistance
 - Create end-to-end test suites with AI guidance
@@ -224,11 +228,11 @@ Cursor's AI capabilities can now fully leverage browser automation:
 
 ## Troubleshooting
 
-### Browser automation not working
+### Browser automation not working (Linux only)
 
 **Problem**: Playwright/Puppeteer tests fail with "browser not found" errors
 
-**Solution**: The Chrome binary should be automatically available in the FHS environment. Verify:
+**Solution**: The Chrome binary should be automatically available in the FHS environment on Linux systems. Verify:
 
 ```bash
 # Inside a shell with cursor available
@@ -237,6 +241,8 @@ echo $CHROME_PATH
 ```
 
 Both should point to the Chrome binary. If not, the FHS environment may not be properly configured.
+
+**macOS users**: Browser automation requires separate Chrome installation. This feature is Linux-only.
 
 ### Cursor won't start on NixOS
 
