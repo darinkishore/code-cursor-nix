@@ -15,7 +15,10 @@
     flake-utils.lib.eachDefaultSystem (
       system:
       let
-        pkgs = nixpkgs.legacyPackages.${system};
+        pkgs = import nixpkgs {
+          inherit system;
+          config.allowUnfree = true;
+        };
       in
       {
         packages = {
@@ -23,14 +26,37 @@
           default = self.packages.${system}.cursor;
         };
 
-        # Development shell for testing
+        apps = {
+          default = {
+            type = "app";
+            program = "${self.packages.${system}.default}/bin/cursor";
+          };
+          cursor = {
+            type = "app";
+            program = "${self.packages.${system}.cursor}/bin/cursor";
+          };
+        };
+
+        # Development shell for contributors
         devShells.default = pkgs.mkShell {
           packages = with pkgs; [
+            nix
+            git
             curl
             jq
+            gh
             nix-prefetch
           ];
         };
       }
-    );
+    )
+    // {
+      # Version tracking for auto-update
+      version = "2.0.43";
+
+      # Overlay for NixOS integration
+      overlays.default = final: prev: {
+        cursor = final.callPackage ./package.nix { };
+      };
+    };
 }
