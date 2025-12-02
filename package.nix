@@ -6,6 +6,9 @@
   makeWrapper,
   undmg,
   google-chrome,
+  # Auth/keyring support
+  libsecret,
+  xdg-utils,
 }:
 
 let
@@ -44,14 +47,23 @@ if stdenv.hostPlatform.isLinux then
     src = source;
 
     # Include Chrome in the FHS environment for Browser Automation
+    # Plus libsecret for keyring/secrets access
     extraPkgs = pkgs: [
       google-chrome
+      libsecret
+      xdg-utils
     ];
 
     # Ensure Chrome is accessible with standard names
+    # Plus portal/keyring env vars for auth
     extraBwrapArgs = [
       "--setenv CHROME_BIN ${google-chrome}/bin/google-chrome-stable"
       "--setenv CHROME_PATH ${google-chrome}/bin/google-chrome-stable"
+      # Portal support for xdg-open/OAuth callbacks
+      "--setenv NIXOS_XDG_OPEN_USE_PORTAL 1"
+      "--setenv GTK_USE_PORTAL 1"
+      # Electron platform hint
+      "--setenv ELECTRON_OZONE_PLATFORM_HINT auto"
     ];
 
     extraInstallCommands = ''
