@@ -70,7 +70,19 @@ if stdenv.hostPlatform.isLinux then
       # Install desktop file and icons
       install -Dm444 ${appimageContents}/cursor.desktop -t $out/share/applications
       substituteInPlace $out/share/applications/cursor.desktop \
-        --replace-fail 'Exec=cursor' 'Exec=${pname}'
+        --replace-fail 'Exec=cursor' 'Exec=${pname}' \
+        --replace-fail 'MimeType=application/x-cursor-workspace;' 'MimeType=application/x-cursor-workspace;x-scheme-handler/cursor;'
+
+      # Create URL handler desktop file for OAuth callbacks
+      cat > $out/share/applications/cursor-url-handler.desktop << EOF
+      [Desktop Entry]
+      Name=Cursor URL Handler
+      Exec=${pname} --open-url %U
+      Type=Application
+      Terminal=false
+      NoDisplay=true
+      MimeType=x-scheme-handler/cursor;
+      EOF
 
       # Copy icon files
       for size in 16 32 48 64 128 256 512 1024; do
